@@ -32,6 +32,8 @@
 // "fullstack"/"full stack"/"full-stack"→fullstack, anything else→general.
 // Never discuss anything outside resume/hiring. Stay focused.`;
 
+// // ⚠️ IMPORTANT: Move this to your .env file before deploying!
+// const GROQ_API_KEY = "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";
 
 // export default function ResumeAssistant({ onClose }) {
 //   const [messages, setMessages] = useState([]);
@@ -353,7 +355,9 @@ Match keywords: "mobile"/"android"→android, "flutter"/"cross-platform"→flutt
 "fullstack"/"full stack"/"full-stack"→fullstack, anything else→general.
 Never discuss anything outside resume/hiring. Stay focused.`;
 
-const GROQ_API_KEY = "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";
+// ⚠️ IMPORTANT: Move this to your .env file before deploying!
+const GROQ_API_KEY = process.env.REACT_APP_GROQ_API_KEY;
+
 export default function ResumeAssistant({ onClose }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -365,7 +369,7 @@ export default function ResumeAssistant({ onClose }) {
   // Calculate experience once when component loads
   const experienceString = calculateTotalExperience();
   const SYSTEM_PROMPT = generateSystemPrompt(experienceString);
-// eslint-disable-next-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (hasStarted.current) return;
     hasStarted.current = true;
