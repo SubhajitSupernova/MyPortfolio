@@ -353,7 +353,7 @@ Match keywords: "mobile"/"android"→android, "flutter"/"cross-platform"→flutt
 "fullstack"/"full stack"/"full-stack"→fullstack, anything else→general.
 Never discuss anything outside resume/hiring. Stay focused.`;
 
-const GROQ_API_KEY = process.env.REACT_APP_GROQ_API_KEY;
+const GROQ_API_KEY = "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";
 export default function ResumeAssistant({ onClose }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
