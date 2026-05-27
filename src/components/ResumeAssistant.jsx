@@ -11,10 +11,38 @@
 //   general: { file: "/resumes/resume-general.pdf", label: "Software Engineer" },
 // };
 
-// const SYSTEM_PROMPT = `You are a friendly AI assistant on Subhajit Bardhan's portfolio website.
-// Your ONLY job is to figure out what role the visitor is hiring for, then respond with a JSON object.
-// Subhajit's available resumes:
+// // Helper function to calculate total experience dynamically
+// const calculateTotalExperience = () => {
+//   const startDivergent = new Date("2025-01-11");
+//   const endDivergent = new Date("2025-08-31"); // Left in August
+//   const startNevaeh = new Date("2025-09-01");   // Joined in September
+//   const today = new Date();
 
+//   const divergentTime = endDivergent.getTime() - startDivergent.getTime();
+//   const nevaehTime = today.getTime() - startNevaeh.getTime();
+
+//   // Average milliseconds in a month (30.44 days)
+//   const msInMonth = 1000 * 60 * 60 * 24 * 30.4375;
+//   const totalMonths = Math.round((divergentTime + nevaehTime) / msInMonth);
+
+//   const years = Math.floor(totalMonths / 12);
+//   const months = totalMonths % 12;
+
+//   if (years > 0) {
+//     return `${years} year${years > 1 ? "s" : ""} and ${months} month${months !== 1 ? "s" : ""}`;
+//   }
+//   return `${months} months`;
+// };
+
+// const generateSystemPrompt = (expString) => `You are a friendly AI assistant on Subhajit Bardhan's portfolio website.
+// Your ONLY job is to figure out what role the visitor is hiring for, then respond with a JSON object.
+
+// Subhajit currently has a total of ${expString} of professional software development experience. 
+// His career timeline consists of:
+// 1. Android Developer Intern at Divergent (Jan 11, 2025 - August 2025)
+// 2. Software Engineer at Nevaeh Technology Private Limited (September 2025 - Present)
+
+// Subhajit's available resumes:
 // android   → Android Developer (Java, XML, Android SDK)
 // flutter   → Flutter Developer (Dart, cross-platform iOS & Android)
 // backend   → Java Backend Engineer (Spring Boot, REST APIs)
@@ -23,7 +51,7 @@
 // general   → General Software Engineer (broad skills)
 
 // Rules:
-// Greet the user warmly and ask what role they are hiring for. Keep it short and friendly.
+// Greet the user warmly and ask what role they are hiring for. Keep it short and friendly. Mention Subhajit's total experience (${expString}) naturally if relevant to their confidence.
 // Once you know the role, respond ONLY with this exact JSON (no extra text):
 // {"role": "android", "message": "Great! Downloading Subhajit's Android resume for you now..."}
 // If unsure, ask one clarifying question.
@@ -41,9 +69,12 @@
 //   const [loading, setLoading] = useState(false);
 //   const [downloading, setDownloading] = useState(null);
 //   const bottomRef = useRef(null);
-//   const hasStarted = useRef(false); // ✅ prevents multiple calls
+//   const hasStarted = useRef(false);
 
-//   // ✅ Only fires ONCE when panel opens
+//   // Calculate experience once when component loads
+//   const experienceString = calculateTotalExperience();
+//   const SYSTEM_PROMPT = generateSystemPrompt(experienceString);
+
 //   useEffect(() => {
 //     if (hasStarted.current) return;
 //     hasStarted.current = true;
@@ -68,13 +99,11 @@
 //   const sendToAI = async (history, isFirstMessage = false) => {
 //     setLoading(true);
 
-//     // ✅ Always start the background history with a user message so Groq doesn't crash
 //     let formattedMessages = [
 //       { role: "system", content: SYSTEM_PROMPT },
 //       { role: "user", content: "Start the conversation." } 
 //     ];
 
-//     // ✅ If it's not the first message, append the rest of the visible chat history
 //     if (!isFirstMessage) {
 //       const historyMessages = history.map((m) => ({
 //         role: m.from === "user" ? "user" : "assistant",
@@ -91,7 +120,7 @@
 //           "Authorization": `Bearer ${GROQ_API_KEY}`
 //         },
 //         body: JSON.stringify({
-//           model: "llama-3.1-8b-instant", // Using Groq's most stable fast model
+//           model: "llama-3.1-8b-instant",
 //           messages: formattedMessages,
 //           temperature: 0.2,
 //         }),
@@ -99,7 +128,6 @@
 
 //       const data = await res.json();
 
-//       // ✅ Catch API Errors properly (e.g., Invalid API Key, Bad Request)
 //       if (!res.ok) {
 //         console.error("Groq API Error:", data);
 //         setMessages((prev) => [
@@ -112,7 +140,6 @@
 
 //       const raw = data.choices?.[0]?.message?.content || "";
 
-//       // ✅ Fallback if empty response
 //       if (!raw) {
 //         setMessages((prev) => [
 //           ...prev,
@@ -122,7 +149,6 @@
 //         return;
 //       }
 
-//       // ✅ Check if AI returned a JSON role decision
 //       const jsonMatch = raw.match(/{[\s\S]*}/);
 //       if (jsonMatch) {
 //         try {
@@ -142,7 +168,6 @@
 //         }
 //       }
 
-//       // ✅ Normal conversational reply
 //       const aiMsg = { from: "ai", text: raw };
 //       setMessages((prev) => (isFirstMessage ? [aiMsg] : [...prev, aiMsg]));
 
@@ -294,29 +319,32 @@
 //     </motion.div>
 //   );
 // }
+
+
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+// ✅ FIXED: These names now EXACTLY match the files in your VS Code screenshot!
 const RESUME_MAP = {
-  android: { file: "/resumes/resume-android.pdf", label: "Android Developer" },
-  flutter: { file: "/resumes/resume-flutter.pdf", label: "Flutter Developer" },
-  backend: { file: "/resumes/resume-backend.pdf", label: "Java Backend Engineer" },
-  react: { file: "/resumes/resume-react.pdf", label: "Frontend / React Developer" },
-  fullstack: { file: "/resumes/resume-fullstack.pdf", label: "Full Stack Developer" },
-  general: { file: "/resumes/resume-general.pdf", label: "Software Engineer" },
+  android:   { file: "/resumes/Subhajit_Bardhan_Android_Flutter_Resume.pdf", label: "Android Developer" },
+  flutter:   { file: "/resumes/Subhajit_Bardhan_Android_Flutter_Resume.pdf", label: "Flutter Developer" },
+  backend:   { file: "/resumes/Subhajit_Bardhan_Java_Resume.pdf", label: "Java Backend Engineer" },
+  nodejs:    { file: "/resumes/Subhajit_Bardhan_NodeJS_Resume.pdf", label: "Node.js Developer" },
+  react:     { file: "/resumes/Subhajit_Bardhan__Resume.pdf", label: "Frontend / React Developer" },
+  fullstack: { file: "/resumes/Subhajit_Bardhan__Resume.pdf", label: "Full Stack Developer" },
+  general:   { file: "/resumes/Subhajit_Bardhan__Resume.pdf", label: "Software Engineer" },
 };
 
 // Helper function to calculate total experience dynamically
 const calculateTotalExperience = () => {
   const startDivergent = new Date("2025-01-11");
-  const endDivergent = new Date("2025-08-31"); // Left in August
-  const startNevaeh = new Date("2025-09-01");   // Joined in September
+  const endDivergent = new Date("2025-08-31"); 
+  const startNevaeh = new Date("2025-09-01");   
   const today = new Date();
 
   const divergentTime = endDivergent.getTime() - startDivergent.getTime();
   const nevaehTime = today.getTime() - startNevaeh.getTime();
 
-  // Average milliseconds in a month (30.44 days)
   const msInMonth = 1000 * 60 * 60 * 24 * 30.4375;
   const totalMonths = Math.round((divergentTime + nevaehTime) / msInMonth);
 
@@ -341,6 +369,7 @@ Subhajit's available resumes:
 android   → Android Developer (Java, XML, Android SDK)
 flutter   → Flutter Developer (Dart, cross-platform iOS & Android)
 backend   → Java Backend Engineer (Spring Boot, REST APIs)
+nodejs    → Node.js Developer (Node.js, Express.js, REST APIs)
 react     → Frontend Developer (React, Tailwind, JavaScript)
 fullstack → Full Stack Developer (React + Spring Boot)
 general   → General Software Engineer (broad skills)
@@ -348,11 +377,11 @@ general   → General Software Engineer (broad skills)
 Rules:
 Greet the user warmly and ask what role they are hiring for. Keep it short and friendly. Mention Subhajit's total experience (${expString}) naturally if relevant to their confidence.
 Once you know the role, respond ONLY with this exact JSON (no extra text):
-{"role": "android", "message": "Great! Downloading Subhajit's Android resume for you now..."}
+{"role": "backend", "message": "Great! Downloading Subhajit's Java Backend resume for you now..."}
 If unsure, ask one clarifying question.
 Match keywords: "mobile"/"android"→android, "flutter"/"cross-platform"→flutter,
-"backend"/"java"/"spring"/"api"→backend, "frontend"/"react"/"ui"→react,
-"fullstack"/"full stack"/"full-stack"→fullstack, anything else→general.
+"backend"/"java"/"spring"/"api"→backend, "node"/"nodejs"/"express"/"node.js"→nodejs,
+"frontend"/"react"/"ui"→react, "fullstack"/"full stack"/"full-stack"→fullstack, anything else→general.
 Never discuss anything outside resume/hiring. Stay focused.`;
 
 // ⚠️ IMPORTANT: Move this to your .env file before deploying!
@@ -366,7 +395,6 @@ export default function ResumeAssistant({ onClose }) {
   const bottomRef = useRef(null);
   const hasStarted = useRef(false);
 
-  // Calculate experience once when component loads
   const experienceString = calculateTotalExperience();
   const SYSTEM_PROMPT = generateSystemPrompt(experienceString);
 
@@ -374,6 +402,7 @@ export default function ResumeAssistant({ onClose }) {
     if (hasStarted.current) return;
     hasStarted.current = true;
     setTimeout(() => sendToAI([], true), 300);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -383,12 +412,19 @@ export default function ResumeAssistant({ onClose }) {
   const triggerDownload = (roleKey) => {
     const resume = RESUME_MAP[roleKey] || RESUME_MAP.general;
     setDownloading(resume.label);
+    
     const link = document.createElement("a");
-    link.href = resume.file;
+    // Added a timestamp to force the browser to ignore its cache and pull the real PDF
+    link.href = `${resume.file}?t=${new Date().getTime()}`;
     link.download = `Subhajit_Bardhan_${resume.label.replace(/ /g, "_")}_Resume.pdf`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    // Clear the downloading status after 2 seconds
+    setTimeout(() => {
+      setDownloading(null);
+    }, 2000);
   };
 
   const sendToAI = async (history, isFirstMessage = false) => {
@@ -424,7 +460,6 @@ export default function ResumeAssistant({ onClose }) {
       const data = await res.json();
 
       if (!res.ok) {
-        console.error("Groq API Error:", data);
         setMessages((prev) => [
           ...prev,
           { from: "ai", text: `API Error: ${data.error?.message || "Check the console for details."}` },
@@ -599,7 +634,7 @@ export default function ResumeAssistant({ onClose }) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKey}
-          placeholder="e.g. Android developer..."
+          placeholder="e.g. Java developer..."
           disabled={loading || !!downloading}
           className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:border-purple-400/50 disabled:opacity-40"
         />
@@ -614,3 +649,5 @@ export default function ResumeAssistant({ onClose }) {
     </motion.div>
   );
 }
+
+
